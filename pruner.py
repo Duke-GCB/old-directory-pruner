@@ -6,7 +6,8 @@ import logging
 import sys
 import shutil
 
-logging.basicConfig(level=logging.INFO)
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(level=logging.INFO, format=FORMAT)
 
 # Constants for converting bytes
 K=1024
