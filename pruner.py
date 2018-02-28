@@ -90,7 +90,7 @@ def clean(path, desired_free_bytes, min_age_days, dry_run=True):
     absolute_path = os.path.join(path, name)
     if age_days > min_age_days:
       size = get_size(absolute_path)
-      logging.info('{0}Removing {1}. Age: {2} days, Size: {3}'.format(prefix, name, age_days, format_size(size)))
+      logging.info('{0}Delete {1}. Age: {2} days, Size: {3}'.format(prefix, name, age_days, format_size(size)))
       if dry_run:
         # on dry_run, won't actually delete anything, but do count
         reclaimed_bytes += size
@@ -111,7 +111,7 @@ def main():
     exit(1)
   path = sys.argv[1]
   desired_free_bytes = float(sys.argv[2]) * TB
-  min_age_days = float(sys.argv[3])
+  min_age_days = int(sys.argv[3])
 
   if '--delete' in sys.argv:
     dry_run = False
