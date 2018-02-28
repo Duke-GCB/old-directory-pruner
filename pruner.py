@@ -54,17 +54,23 @@ def get_oldest_directory(parent, exclude=[]):
   else:
     return None
 
-
 def get_free_bytes(path):
   result = os.statvfs(path)
   free_bytes = result.f_bfree * result.f_frsize
   return free_bytes
 
-def reclaim(path):
-  logging.info('Deleting {}'.format(path))
+def delete(path):
+  logging.debug('Deleting {}'.format(path))
+
+def format_size(bytes):
+  if bytes > TB: divisor, unit = TB, 'TB'
+  elif bytes > GB: divisor, unit = GB, 'GB'
+  elif bytes > MB: divisor, unit = MB, 'MB'
+  else: divisor, unit = KB, 'KB'
+  return '{} {}'.format(bytes / divisor, unit)
 
 def clean(path, desired_free_bytes, min_age_days):
-  logging.info('Starting, targeting {} GB free and removing directories older than {} days'.format(desired_free_bytes / GB, min_age_days))
+  logging.info('Starting, targeting {} free and removing directories older than {} days'.format(format_size(desired_free_bytes), min_age_days))
 
   # For dry-run
   reclaimed_dirs=[]
@@ -72,25 +78,25 @@ def clean(path, desired_free_bytes, min_age_days):
 
   free_bytes = get_free_bytes(path)
   while free_bytes < desired_free_bytes:
-    logging.info('Current free space: {} GB, desired: {} GB'.format(free_bytes / GB, desired_free_bytes / GB))
+    logging.debug('Current free space: {}, desired: {}'.format(format_size(free_bytes), format_size(desired_free_bytes)))
     oldest_directory = get_oldest_directory(path, exclude=reclaimed_dirs)
     if not oldest_directory:
       logging.info('Stopping: No directories found')
       break
     name, age_days = oldest_directory
     absolute_path = os.path.join(path, name)
-    logging.info('Oldest directory is {} at {} days'.format(name, age_days))
     if age_days > min_age_days:
-      logging.debug('Directory {} age is {} days, older than our minimum of {}'.format(name, age_days, min_age_days))
-      reclaim(name)
-      reclaimed_bytes += get_size(absolute_path)
+      size = get_size(absolute_path)
+      logging.info('Deleting oldest directory {} ({} days) to reclaim {}'.format(name, age_days, format_size(size)))
+      delete(name)
+      reclaimed_bytes += size
       reclaimed_dirs.append(name)
     else:
       logging.info('Stopping: Oldest directory {} age is {} days, newer than our minimum of {}'.format(name, age_days, min_age_days))
       break
     free_bytes = get_free_bytes(path) + reclaimed_bytes
   else:
-    logging.info('Current free space: {} GB exceeds desired free space: {} GB, done!'.format(free_bytes / GB, desired_free_bytes / GB))
+    logging.info('Current free space: {} exceeds desired free space: {}, done!'.format(format_size(free_bytes), format_size(desired_free_bytes)))
 
 def main():
   if len(sys.argv) < 4:
