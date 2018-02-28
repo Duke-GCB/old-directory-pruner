@@ -23,7 +23,7 @@ def get_size(path):
         total_bytes += os.path.getsize(fp)
       except os.error as e:
         # Path does not exist or is inaccessible
-        logging.warning('Skipping due to os.error {}'.format(path, e))
+        logging.warning('Skipping due to os.error {0}'.format(e))
         pass
   return total_bytes
 
@@ -47,7 +47,7 @@ def get_oldest_directory(parent, exclude=[]):
         # When tallying the subdirectories and ages, just use the relative path
         directories_ages.append((child, age_days))
     except os.error as e:
-      logging.warning('Skipping due to os.error {}'.format(path, e))
+      logging.warning('Skipping due to os.error {0}'.format(e))
   sorted_by_age = sorted(directories_ages, key=lambda x: x[1], reverse=True)
   if sorted_by_age:
     return sorted_by_age[0]
@@ -60,17 +60,17 @@ def get_free_bytes(path):
   return free_bytes
 
 def delete(path):
-  logging.debug('Deleting {}'.format(path))
+  logging.debug('Deleting {0}'.format(path))
 
 def format_size(bytes):
   if bytes > TB: divisor, unit = TB, 'TB'
   elif bytes > GB: divisor, unit = GB, 'GB'
   elif bytes > MB: divisor, unit = MB, 'MB'
   else: divisor, unit = KB, 'KB'
-  return '{} {}'.format(bytes / divisor, unit)
+  return '{0} {1}'.format(bytes / divisor, unit)
 
 def clean(path, desired_free_bytes, min_age_days):
-  logging.info('Starting, targeting {} free and removing directories older than {} days'.format(format_size(desired_free_bytes), min_age_days))
+  logging.info('Starting, targeting {0} free and removing directories older than {1} days'.format(format_size(desired_free_bytes), min_age_days))
 
   # For dry-run
   reclaimed_dirs=[]
@@ -78,7 +78,7 @@ def clean(path, desired_free_bytes, min_age_days):
 
   free_bytes = get_free_bytes(path)
   while free_bytes < desired_free_bytes:
-    logging.debug('Current free space: {}, desired: {}'.format(format_size(free_bytes), format_size(desired_free_bytes)))
+    logging.debug('Current free space: {0}, desired: {1}'.format(format_size(free_bytes), format_size(desired_free_bytes)))
     oldest_directory = get_oldest_directory(path, exclude=reclaimed_dirs)
     if not oldest_directory:
       logging.info('Stopping: No directories found')
@@ -87,20 +87,20 @@ def clean(path, desired_free_bytes, min_age_days):
     absolute_path = os.path.join(path, name)
     if age_days > min_age_days:
       size = get_size(absolute_path)
-      logging.info('Deleting oldest directory {} ({} days) to reclaim {}'.format(name, age_days, format_size(size)))
+      logging.info('Deleting oldest directory {0} ({1} days) to reclaim {2}'.format(name, age_days, format_size(size)))
       delete(name)
       reclaimed_bytes += size
       reclaimed_dirs.append(name)
     else:
-      logging.info('Stopping: Oldest directory {} age is {} days, newer than our minimum of {}'.format(name, age_days, min_age_days))
+      logging.info('Stopping: Oldest directory {0} age is {1} days, newer than our minimum of {2}'.format(name, age_days, min_age_days))
       break
     free_bytes = get_free_bytes(path) + reclaimed_bytes
   else:
-    logging.info('Current free space: {} exceeds desired free space: {}, done!'.format(format_size(free_bytes), format_size(desired_free_bytes)))
+    logging.info('Current free space: {0} exceeds desired free space: {1}, done!'.format(format_size(free_bytes), format_size(desired_free_bytes)))
 
 def main():
   if len(sys.argv) < 4:
-    print 'Usage: {} <path> <desired free space in TB> <number of days to keep>'.format(sys.argv[0])
+    print 'Usage: {0} <path> <desired free space in TB> <number of days to keep>'.format(sys.argv[0])
     exit(1)
   path = sys.argv[1]
   desired_free_bytes = float(sys.argv[2]) * TB
