@@ -107,14 +107,14 @@ def clean(path, desired_free_bytes, min_age_days, dry_run=True):
 
 def main():
   if len(sys.argv) < 4:
-    print 'Usage: {0} <path> <desired free space in TB> <number of days to keep> [--delete]\n'.format(sys.argv[0])
-    print 'Without --delete, this script will only report what would be deleted to meet the desired metrics'
+    print 'Usage: {0} <path> <desired free space in TB> <number of days to keep> [--remove]\n'.format(sys.argv[0])
+    print 'Without --remove, the script will not delete any data, just report what would be removed to meet desired criteria.'
     exit(1)
   path = sys.argv[1]
   desired_free_bytes = float(sys.argv[2]) * TB
   min_age_days = int(sys.argv[3])
 
-  if '--delete' in sys.argv:
+  if '--remove' in sys.argv:
     dry_run = False
   else:
     dry_run = True
