@@ -62,12 +62,12 @@ def format_size(bytes):
 
 def main():
   if len(sys.argv) < 2:
-    print 'Usage: {0} <path>\n'.format(sys.argv[0])
+    print('Usage: {0} <path>\n'.format(sys.argv[0]))
     exit(1)
   path = sys.argv[1]
   result = get_directories_ages(path)
   for r in result:
-    print r
+    print(r)
 
 if __name__ == '__main__':
   main()
